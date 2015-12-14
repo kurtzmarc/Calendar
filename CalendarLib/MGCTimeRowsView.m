@@ -107,13 +107,15 @@
 		time = roundf(time / (self.rounding * 60)) * (self.rounding * 60);
 	}
 	
-	int hour = (int)(time / 3600) % 24;
-	int minutes = ((int)time % 3600) / 60;
+    int hour = (int)(time / 3600) % 24;
+    BOOL am = hour / 12 == 0;
+    hour = hour % 12 == 0 ? 12 : hour % 12;
+    int minutes = ((int)time % 3600) / 60;
 
 	if (minutesOnly) {
 		return [NSString stringWithFormat:@":%02d", minutes];
-	}
-	return [NSString stringWithFormat:@"%02d:%02d", hour, minutes];
+    }
+    return [NSString stringWithFormat:@"%01d:%02d %@", hour, minutes, am ? @"AM" : @"PM"];
 }
 
 - (void)drawRect:(CGRect)rect
@@ -153,7 +155,9 @@
 	// draw the hour marks
 	for (int i = 0; i <= 24; i++) {
 		
-		s = [NSString stringWithFormat:@"%02d:00", i % 24];
+        int hour = i % 12 == 0 ? 12 : i % 12;
+        BOOL am = (i % 24) / 12 == 0;
+        s = [NSString stringWithFormat:@"%01d %@", hour, am ? @"AM" : @"PM"];
 		size = [s sizeWithAttributes:@{ NSFontAttributeName:self.font }];
 		y = i * self.hourSlotHeight + self.insetsHeight;
 		pt = CGPointMake(self.timeColumnWidth - (size.width + kSpacing), y - size.height / 2.);
